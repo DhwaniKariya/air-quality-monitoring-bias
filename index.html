@@ -311,7 +311,8 @@
       A data-analysis &amp; bias-mitigation project by <strong>Dhwani Sanjay Kariya</strong>,
       MSc AI for Business, National College of Ireland. I originally built this for the
       <em>Emerging AI Technologies &amp; Sustainability</em> module CA.
-      <a href="REPORT.md">Read the full written report ↗</a>
+      <a href="ANALYSIS.md">Read the full write-up ↗</a> ·
+      <a href="analysis/">See the Python code ↗</a>
     </p>
   </section>
 </div>
@@ -354,7 +355,7 @@
         <p class="chart-title">AQI monitoring coverage by county poverty-rate quartile</p>
         <p class="chart-sub">% of counties in each quartile with an active monitor</p>
         <svg class="chart-svg" id="chartPoverty" width="520" height="280" viewBox="0 0 520 280" role="img" aria-label="Bar chart: monitoring coverage falls from 41.7% in the lowest-poverty quartile to 21.5% in the highest-poverty quartile"></svg>
-        <p class="note">Q1/Q4 as reported (41.7% to 21.5%), Q2 to Q3 interpolated for illustration.</p>
+        <p class="note">All four quartiles computed directly from the merged dataset.</p>
       </div>
       <div class="card">
         <p class="chart-title">The income gap</p>
@@ -382,8 +383,8 @@
     <p class="eyebrow">03 · The racial paradox</p>
     <h2>The same data tells two opposite stories</h2>
     <p class="section-intro">
-      Count <em>counties</em> and the most-diverse quartile looks best-monitored. Count
-      <em>people</em> instead, and the least-diverse quartile turns out to be the one left
+      Count <em>counties</em> and coverage looks like it climbs with diversity. Count
+      <em>people</em> instead, and it's the least-diverse quartile that turns out to be left
       behind. Low-diversity counties tend to be small and rural, so a handful of monitored
       counties can hide millions of unmonitored residents.
     </p>
@@ -399,7 +400,7 @@
         </div>
       </div>
       <svg class="chart-svg" id="chartRace" width="640" height="300" viewBox="0 0 640 300" role="img" aria-label="Toggleable bar chart comparing racial composition quartiles by county count versus by population"></svg>
-      <p class="note" id="raceNote">Q1 = least diverse quartile of counties, Q4 = most diverse quartile. Q1/Q4 as reported (19.8% to 38.3%), Q2 to Q3 interpolated.</p>
+      <p class="note" id="raceNote">Q1 = least diverse quartile of counties, Q4 = most diverse quartile. All four quartiles computed directly from the merged dataset.</p>
     </div>
   </section>
 
@@ -523,6 +524,9 @@
       <li><strong>U.S. Census Bureau, SAIPE (2023)</strong>: county median household income and poverty rate.</li>
       <li><strong>U.S. Census Bureau Population Estimates (2023)</strong>: total population and racial/ethnic composition.</li>
     </ul>
+    <p class="note">The actual Python I used to download, merge, and model this data is in
+      <a href="analysis/">the <code>analysis/</code> folder</a> of this repo, it downloads its
+      own raw data on first run, so it should just work if you clone it and run it yourself.</p>
 
     <details class="datatable">
       <summary>View every figure on this page as a data table</summary>
@@ -532,14 +536,10 @@
         <tbody>
           <tr><td>Counties with an active monitor</td><td class="num">1,049 / 3,143 (33.4%)</td><td>Reported directly</td></tr>
           <tr><td>Counties with no active monitor</td><td class="num">2,094 / 3,143 (66.6%)</td><td>Reported directly</td></tr>
-          <tr><td>Coverage, lowest-poverty quartile (Q1)</td><td class="num">41.7%</td><td>Reported directly</td></tr>
-          <tr><td>Coverage, highest-poverty quartile (Q4)</td><td class="num">21.5%</td><td>Reported directly</td></tr>
-          <tr><td>Coverage, lowest-income quartile</td><td class="num">15.1%</td><td>Reported directly</td></tr>
-          <tr><td>Coverage, highest-income quartile</td><td class="num">54.5%</td><td>Reported directly</td></tr>
-          <tr><td>Raw coverage, least-diverse quartile (Q1)</td><td class="num">19.8%</td><td>Reported directly</td></tr>
-          <tr><td>Raw coverage, most-diverse quartile (Q4)</td><td class="num">38.3%</td><td>Reported directly</td></tr>
-          <tr><td>Population unmonitored, least-diverse quartile</td><td class="num">62.6%</td><td>Reported directly</td></tr>
-          <tr><td>Population unmonitored, most-diverse quartile</td><td class="num">10.2%</td><td>Reported directly</td></tr>
+          <tr><td>Coverage by poverty quartile (Q1 to Q4)</td><td class="num">41.7% / 37.4% / 32.6% / 21.5%</td><td>Reported directly</td></tr>
+          <tr><td>Coverage by income quartile (Q1 to Q4)</td><td class="num">15.1% / 29.4% / 34.5% / 54.5%</td><td>Reported directly</td></tr>
+          <tr><td>Raw coverage by diversity quartile (Q1 to Q4)</td><td class="num">19.8% / 34.0% / 41.4% / 38.3%</td><td>Reported directly</td></tr>
+          <tr><td>Population unmonitored by diversity quartile (Q1 to Q4)</td><td class="num">62.6% / 40.6% / 19.5% / 10.2%</td><td>Reported directly</td></tr>
           <tr><td>Odds ratio, log(population)</td><td class="num">≈2.64</td><td>Logistic regression</td></tr>
           <tr><td>Odds ratio, median income (per $1,000)</td><td class="num">≈1.0074</td><td>Logistic regression</td></tr>
           <tr><td>Odds ratio, minority %</td><td class="num">≈1.0015</td><td>Logistic regression</td></tr>
@@ -564,7 +564,9 @@
 <footer>
   <div class="wrap">
     <div class="foot-links">
-      <a href="REPORT.md">Full written report</a>
+      <a href="ANALYSIS.md">Full write-up</a>
+      <a href="analysis/">Python code</a>
+      <a href="REPORT.md">Carbon footprint essay</a>
       <a href="https://github.com/DhwaniKariya/air-quality-monitoring-bias">GitHub repository</a>
       <a href="https://github.com/DhwaniKariya">@DhwaniKariya</a>
       <a href="#gap">Back to top ↑</a>
@@ -710,20 +712,20 @@
   /* ---------------- data ---------------- */
   var povertyData = [
     {label:'Q1', sublabel:'lowest poverty', value:41.7, color:'var(--series-1)'},
-    {label:'Q2', sublabel:'', value:37.3, color:'var(--series-1)'},
+    {label:'Q2', sublabel:'', value:37.4, color:'var(--series-1)'},
     {label:'Q3', sublabel:'', value:32.6, color:'var(--series-1)'},
     {label:'Q4', sublabel:'highest poverty', value:21.5, color:'var(--series-1)'}
   ];
 
   var raceByCounty = [
     {label:'Q1', sublabel:'least diverse', value:19.8},
-    {label:'Q2', sublabel:'', value:30.0},
-    {label:'Q3', sublabel:'', value:34.0},
+    {label:'Q2', sublabel:'', value:34.0},
+    {label:'Q3', sublabel:'', value:41.4},
     {label:'Q4', sublabel:'most diverse', value:38.3}
   ];
   var raceByPop = [
     {label:'Q1', sublabel:'least diverse', value:62.6},
-    {label:'Q2', sublabel:'', value:40.5},
+    {label:'Q2', sublabel:'', value:40.6},
     {label:'Q3', sublabel:'', value:19.5},
     {label:'Q4', sublabel:'most diverse', value:10.2}
   ];
@@ -766,12 +768,12 @@
       verticalBars(raceSvg, raceByCounty, {max:46, unit:'%', valueFmt:pct});
       raceTitle.textContent = 'By county: raw coverage rate';
       raceSub.textContent = '% of counties in each quartile with an active monitor';
-      raceNote.textContent = 'Q1 = least diverse quartile of counties, Q4 = most diverse quartile. Q1/Q4 as reported (19.8% to 38.3%), Q2 to Q3 interpolated.';
+      raceNote.textContent = 'Q1 = least diverse quartile of counties, Q4 = most diverse quartile. Coverage actually peaks at Q3 (41.4%) before dipping slightly at Q4, this is the population illusion explained below.';
     } else {
       verticalBars(raceSvg, raceByPop, {max:70, unit:'%', valueFmt:pct});
       raceTitle.textContent = 'By resident: population-weighted';
       raceSub.textContent = '% of residents in each quartile left with NO active monitor nearby';
-      raceNote.textContent = 'Same counties, weighted by who actually lives there. Q1/Q4 as reported (62.6% to 10.2%), Q2 to Q3 interpolated.';
+      raceNote.textContent = 'Same counties, weighted by who actually lives there. This view drops steadily from Q1 to Q4, no dip.';
     }
   }
   renderRace('county');

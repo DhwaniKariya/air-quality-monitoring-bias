@@ -20,10 +20,10 @@ Three things came out of it:
 1. **A lot of counties just aren't watched.** Two thirds of U.S. counties have no active
    monitor, and coverage tracks income and poverty almost linearly.
 2. **Race matters, but not in the way the raw numbers first suggest.** Counting counties
-   makes it look like the most diverse quartile is the best monitored. Counting people
-   instead flips that completely, because low-diversity counties tend to be small and
-   rural. 62.6% of residents in the least diverse quartile have no monitor nearby, versus
-   10.2% in the most diverse quartile.
+   makes it look like more diverse counties are generally better monitored. Counting
+   people instead flips that completely, because low-diversity counties tend to be small
+   and rural. 62.6% of residents in the least diverse quartile have no monitor nearby,
+   versus 10.2% in the most diverse quartile.
 3. **This bias actually breaks a model, not just in theory.** I trained a Random Forest
    only on low-poverty counties and tested it on high-poverty counties it had never seen.
    It did worse there, and two standard mitigation techniques (reweighting and
@@ -36,12 +36,18 @@ numbers.
 
 ## Where this came from
 
-This started as Part 2 of a Continuous Assessment for *Emerging Artificial Intelligence
-Technologies & Sustainability* (H9ETS) at the National College of Ireland. I rebuilt it
-here as a standalone, interactive version of the written analysis. Every number on the
-page comes straight from that report. The full write-up is in
-[`REPORT.md`](./REPORT.md), minus the cover sheet, student ID, and signature pages from
-the actual submission, since those don't need to be public.
+This analysis started as coursework for *Emerging Artificial Intelligence Technologies &
+Sustainability* (H9ETS) at the National College of Ireland. I rebuilt it here as a
+standalone, interactive version of the original write-up. Every number on the page comes
+straight from that work, and the full text is in [`ANALYSIS.md`](./ANALYSIS.md), minus the
+cover sheet, student ID, and signature pages from the actual submission, since those don't
+need to be public. The real Python code behind it, the part that downloads the raw
+government data, merges it, and runs the model, is in [`analysis/`](./analysis/).
+
+There's also a second, separate piece from the same module in this repo:
+[`REPORT.md`](./REPORT.md) is an essay I wrote on AI's carbon footprint, looked at through
+Intel as a case study. It isn't part of the interactive page, it's just included here
+alongside this analysis since it came out of the same assignment.
 
 ## Tech
 

@@ -1,181 +1,169 @@
-# Data Analysis and Bias Mitigation in AI Models
+# Creative Analysis of AI's Carbon Footprint
 
-*This is the written report behind the [interactive data story](./index.html). It's the
-analysis text only. The assignment cover sheet, student ID, and signature pages from the
-original submission aren't included here.*
+*This is an essay from the same module as [the air-quality monitoring analysis](./ANALYSIS.md)
+in this repo, written for the same Continuous Assessment. It's the essay text only. The
+assignment cover sheet, student ID, and signature pages from the original submission
+aren't included here.*
 
-Part 2 is about figuring out whether some communities' air is being watched for pollution
-less than others, and whether that gap lines up with how wealthy or poor a community is,
-or how racially diverse it is. I merged public government data on income, race,
-population, and the location of air-quality monitors, mainly because putting them
-together let me actually measure the difference instead of guessing at it, and because
-who gets clean air data directly affects public health and fairness, which is what the
-Sustainable Development Goals are about.
+Most of the public debate about AI's environmental impact lands on one thing: the
+training run. The story is always about the electricity used to train a large language
+model to predict the next word, and the carbon that electricity produces. That's true, but
+it's not the whole picture. Every GPU, every accelerator, every server rack that a model
+gets trained on had to be built in a semiconductor fab first, and fabs consume enormous
+amounts of energy, water, and chemicals before a single training run ever starts. In this
+essay I look at AI's carbon footprint through Intel, a company that sits on both sides of
+this problem: it runs the fabs that produce a lot of that upstream carbon, and it also
+sells the AI accelerators that compete directly in this market. My argument is that AI's
+carbon footprint has to include the whole hardware supply chain, not just the electricity
+bill after the chips are deployed, and that Intel's recent track record shows how easily a
+corporate climate commitment can get pushed aside once the company needs to compete on AI.
 
-## 1. Data Collection and Exploration
+## Current impact analysis
 
-I merged four public datasets at the US county level (n = 3,143 counties):
+Early research on AI's carbon footprint focused on operational energy, which makes sense
+as a starting point. Strubell et al. (2019) produced one of the first real numbers here,
+estimating that training a large Transformer model with neural architecture search
+released around 626,155 pounds of CO2-equivalent, about five times the lifetime emissions
+of an average American car including its production. Patterson et al. (2021) extended this
+to several large models (T5, Meena, GShard, Switch Transformer, and GPT-3) and estimated
+about 552 tonnes of CO2-equivalent for a single GPT-3 training run, with emissions varying
+a lot depending on the data centre's energy mix and hardware efficiency. Luccioni et al.
+(2023) looked at the same question from a lifecycle angle: BLOOM's training released about
+24.7 tonnes of CO2-equivalent counting dynamic power use alone, but 50.5 tonnes once
+equipment manufacturing and operational overhead are added in, roughly double. That gap is
+the whole point. The three factors this module's brief points to, energy sourcing for data
+centres, the computational load of training, and the hardware used to do it, show up in
+both studies.
 
-- **EPA AQS Monitors file** (`aqs_monitors.csv`), which lists every air-quality monitoring
-  site ever registered in the US. I filtered it down to monitors that had sampled on or
-  after 2023-01-01, so it reflects currently active monitoring.
-- **EPA AirData Annual AQI by County (2024)**. Median AQI and the related summary stats
-  are only available for counties that have adequate active monitoring.
-- **US Census Bureau, SAIPE (2023)**, for county-level median household income and
-  poverty rate.
-- **US Census Bureau Population Estimates (2023, county/age/sex/race)**, for total
-  population and racial and ethnic composition (percent non-Hispanic White versus percent
-  minority, percent Black, percent Hispanic).
+Hardware is the piece that gets the least attention, and I think it deserves more. Gupta et
+al. (2020), in *Chasing Carbon: The Elusive Environmental Footprint of Computing*, make the
+point that as computing gets more operationally efficient (better algorithms, more
+renewable energy at data centres), the *share* of embedded carbon in computing actually
+goes up, not down. That's where Intel fits in directly: semiconductor manufacturing is one
+of the most resource-intensive manufacturing processes there is, using ultrapure water,
+huge volumes of process chemicals, and constant high-purity climate control. To give a
+sense of scale, Intel's own disclosures say it conserves about 10.5 billion gallons of
+water a year and has reached net-positive water status in the United States, India,
+Mexico, and Costa Rica (Intel Corporation, 2025). On electricity, Intel says 98 to 99% of
+its electricity use now comes from renewable sources, and its Scope 1 and 2 emissions are
+down 24% since a 2019 baseline (Intel Corporation, 2025).
 
-I joined the four sources on the county FIPS code, or on county plus state name for the
-AQI file, since that one doesn't publish FIPS codes. All 3,143 US counties ended up in the
-merged dataset for income, poverty, population, and monitor presence.
+Those headline numbers look less clean under a more critical read of the same period.
+Scope 1 emissions intensity has actually gone up 56% over the last five years, and once you
+factor in outsourced manufacturing at TSMC (about 30% of Intel's chip volume), actual
+intensity may have more than doubled, which the renewable-electricity story doesn't
+capture at all (Hansell, 2025). Real progress on operational electricity sourcing sitting
+next to a worsening manufacturing-intensity picture is exactly what a training-run-only
+view of AI's carbon footprint would completely miss, and it's made worse by Intel's
+continued multi-billion dollar fab expansion in Arizona and Ohio, built specifically to
+meet demand for the advanced process nodes AI needs (Intel Corporation, 2025).
 
-The first thing that jumped out: as of 2023 to 2024, only **1,049 of 3,143 counties
-(33.4%)** had an active EPA air-quality monitor. Two thirds of the country has no
-ground-truth air-quality reading at all, which means there's no real way to know the air
-quality there if a model or a map claims to describe it.
+## Future projections and mitigation strategies
 
-Next, I looked at poverty. The poorer a county is, the less likely it is to have a sensor.
-Coverage drops from **41.7%** of counties in the lowest poverty quartile down to **21.5%**
-in the highest poverty quartile, roughly a two times gap between the richest and poorest
-counties.
+If current trends keep going, AI's total carbon footprint is likely to grow a lot over the
+next decade, both from the services people use and the hardware needed to run them. AI's
+electricity use could reach the scale of a small country within a few years, somewhere
+around 85 to 134 TWh annually by 2027, as inference workloads keep growing and start to
+outpace training workloads in total energy use (de Vries, 2023). On the hardware side,
+Intel's own construction schedule is a good signal of this: its Ohio fabs won't be ready
+for production until 2030 to 2032, while its Arizona expansion, part of a $50 billion
+regional investment, is aimed specifically at AI-relevant process nodes like Intel 18A and
+20A (Intel Corporation, 2025). Every new fab is a large upfront embodied-carbon cost, years
+before the chips it produces do any actual AI work, so if anything the hardware side of
+AI's footprint is growing faster in the near term than the operational side.
 
-On the racial composition side, the raw numbers actually look backwards at first: coverage
-rises from **19.8%** in the least diverse quartile up to **38.3%** in the most diverse
-quartile, meaning more diverse counties appear better monitored. That turned out to be
-misleading once I weighted by population instead of just counting counties (more on that
-below).
+Mitigation needs to happen on two fronts at once. On the operational side, Wu et al. (2022)
+propose full-stack co-design, pairing more efficient model architectures with carbon-aware
+scheduling, where computation gets scheduled for times and places where the grid is
+cleaner. Intel's Gaudi 3 accelerator is one example of this at the hardware level: the
+company says it uses around 40% less power than Nvidia's H100 on comparable inference
+tasks, which directly cuts operational emissions per unit of AI output (Shilov, 2024).
+Intel has also set a goal to improve product energy efficiency tenfold by 2030 for its
+client and server processors, which would meaningfully cut the downstream (Scope 3)
+emissions its customers generate just by using its chips (Intel Corporation, 2025).
 
-## 2. Bias Identification
+On the manufacturing side, though, efficiency gains alone won't be enough. This needs
+policy too. I'd propose two things here. First, standardised disclosure of embodied carbon
+per chip, something like a nutrition label, so AI developers can factor that into
+purchasing and design decisions instead of only optimizing for performance per watt.
+Second, public funding for fab construction, including the US CHIPS and Science Act (which
+is part of what's funding Intel's Arizona and Ohio expansion), should come with real
+climate commitments attached, not just language, so the gap this essay describes between
+what companies promise and what they actually do doesn't just keep repeating.
 
-There were two different kinds of bias hiding in this dataset, and untangling them took
-more than just comparing quartiles.
+## Ethical considerations
 
-### i) Economic bias
+Beyond the raw emissions numbers, there are ethical questions tied to where AI hardware
+actually gets built. Fabs get built in specific communities, and their water and energy
+demands compete directly with the needs of the people who live there. Intel's expansion in
+Arizona and Ohio is happening in regions that already deal with water stress, so the
+company's water-positive claims are as much about environmental justice as they are about
+corporate messaging. The benefits of AI line up with SDG 6 (Clean Water and Sanitation),
+SDG 7 (Affordable and Clean Energy), and SDG 13 (Climate Action), but those benefits get
+spread globally while the resource costs land locally, often in communities that are
+already vulnerable.
 
-Sensor coverage climbs steadily with income, from **15.1%** in the lowest income quartile
-up to **54.5%** in the highest. The obvious question is whether this is just a population
-size effect, since bigger and denser counties tend to have more regulatory infrastructure
-of every kind, monitors included. I fit a logistic regression using minority percent,
-poverty percent, median income, and log(population) as predictors to check.
+Intel's recent history is a good example of why this is hard. While cutting 25% of its
+workforce and dealing with falling sales in the middle of an AI-chip race, Intel quietly
+dropped its 2030 goal of a 30% cut in supplier emissions, replacing it with vaguer language
+about a "mid-decade refresh" and a 2050 deadline, and the new CEO's compensation plan no
+longer includes a greenhouse-gas reduction target at all (Hansell, 2025). One industry
+analyst put it bluntly: "Unfortunately, in most companies, sustainability is an
+afterthought, as profits are the top priority" (Hansell, 2025). I think that's the core
+ethical problem here. Sustainability pledges made during good times don't mean much if
+they get dropped the moment things get financially tight, and that's exactly the moment AI
+companies racing to catch up are most tempted to cut corners. What's actually needed are
+mechanisms that survive more than one business cycle: independent third-party
+verification of both operational and embodied-carbon numbers, and climate conditions
+attached to public subsidies, so commitments can't just be walked back whenever it's
+convenient.
 
-Population size turned out to be the strongest predictor by far, which isn't surprising
-(odds ratio of about 2.64 per tripling of population, so a county with roughly three times
-the population has roughly three times the odds of having a monitor). But even after
-controlling for population size, poverty rate still has an independent negative effect on
-the odds of getting a monitor (odds ratio around 0.985 per percentage point of poverty),
-and median income still has an independent positive effect (odds ratio around 1.0074 per
-$1,000 of income, which works out to roughly a threefold difference in odds across the
-income range in this data). So monitoring isn't just going where the people are, it's also
-going where the money is, even among similarly sized counties.
+## Conclusion
 
-### ii) Racial bias, but only visible once you weight by population
+AI's carbon footprint isn't just the electricity used to train and run models. It also
+includes the carbon cost of the hardware that makes AI possible in the first place. Intel
+is a good example of both sides of that: real progress on renewable electricity and water
+use, an accelerator programme aimed at efficiency, and, at the same time, a willingness to
+scale back manufacturing-emissions targets under business pressure. What AI actually needs
+is a sustainable path that accounts for the full hardware lifecycle, standardised
+embodied-carbon reporting, and accountability mechanisms strong enough to hold up against
+the same business pressures that are driving AI's growth in the first place.
 
-The raw quartile comparison made it look like higher-minority counties were actually
-better monitored, but that's confounded by urbanicity: the higher-minority counties in
-this dataset also tend to be larger and more urban, and population size is the single
-biggest factor in where monitors get placed. Once I control for population size in the
-regression, the independent effect of minority percentage is almost nothing (odds ratio
-around 1.0015).
+## References
 
-The picture changes a lot once you weight by population instead of by county. Low-diversity
-counties tend to be smaller and more rural, so a small number of monitored counties can
-hide a huge number of unmonitored people. **62.6%** of people living in the least diverse
-quartile of counties have no active monitor nearby, compared to only **10.2%** in the most
-diverse quartile. That's a real and pretty serious monitoring gap, and it's not the kind of
-urban-minority-neighbourhood gap that most environmental justice research usually focuses
-on, which is typically looked at with much finer geographic resolution than a whole county.
+De Vries, A. (2023). The growing energy footprint of artificial intelligence. *Joule*,
+7(10), 2191 to 2194. https://doi.org/10.1016/j.joule.2023.09.004
 
-### iii) What this means downstream, for AI models
+Gupta, U., Kim, Y. G., Lee, S., Tse, J., Lee, H.-H. S., Wei, G.-Y., Brooks, D., & Wu, C.-J.
+(2020). *Chasing Carbon: The Elusive Environmental Footprint of Computing*
+(arXiv:2011.02839). arXiv. https://doi.org/10.48550/arXiv.2011.02839
 
-Air-quality AI systems, whether that's EPA's own tools, academic models, or health-risk
-websites, rely on exactly this kind of monitored-county data to estimate air quality
-somewhere else, at a county with no monitor. Whatever relationship a model learns from
-monitored counties is probably not the same relationship that holds in the poorer, less
-populous counties it then has to predict for. That's covariate shift caused by a sample
-that isn't random. I tested this directly in the next section.
+Hansell, S. (2025, December 3). How Intel's sales tailspin sidelined its 2030
+sustainability ambitions. *Trellis*.
+https://trellis.net/article/intel-sales-tailspin-sidelined-2030-sustainability-ambitions/
 
-## 3. Bias Mitigation
+Intel Corporation. (2025). *2024-25 Corporate Responsibility Report*. Intel Corporation.
+https://csrreportbuilder.intel.com/pdfbuilder/pdfs/CSR-2024-25-Executive-Summary.pdf
 
-Knowing there's a bias in the data doesn't tell you whether it actually matters, so I ran
-an experiment to check. I trained a Random Forest on **484 below-median-poverty counties**
-to predict a county's Median AQI from population, race, poverty rate, and income, then
-tested it on the poorer counties it had never seen during training. That mirrors, on a
-small scale, exactly what a national air-quality model does every day (963 counties in
-total had a valid Median AQI value and made up the modelling subset, with the remaining
-479 above-median-poverty counties held out entirely as the test set).
+Patterson, D., Gonzalez, J., Le, Q., Liang, C., Munguia, L.-M., Rothchild, D., So, D.,
+Texier, M., & Dean, J. (2021). *Carbon Emissions and Large Neural Network Training*
+(arXiv:2104.10350). arXiv. https://doi.org/10.48550/arXiv.2104.10350
 
-**Mitigation 1, reweighting.** I reweighted the low-poverty training counties based on how
-similar they are to the missing high-poverty group, using a propensity model, so counties
-most like the missing group get the most weight. This matters because a model trained on
-unweighted data implicitly treats every county as equally important, which just bakes the
-original sampling error straight into its predictions.
+Shilov, A. (2024, September 24). Intel launches Gaudi 3 accelerator for AI: Slower than
+Nvidia's H100 AI GPU, but also cheaper. *Tom's Hardware*.
+https://www.tomshardware.com/tech-industry/artificial-intelligence/intel-launches-gaudi-3-accelerator-for-ai-slower-than-h100-but-also-cheaper
 
-**Mitigation 2, oversampling.** I found the low-poverty counties closest to the
-high-poverty boundary and bootstrap-sampled them into the training set using
-`sklearn.utils.resample`. The idea is that reweighting can only redistribute the influence
-of examples that already exist, while oversampling actually adds more concrete training
-examples in the region where the model is weakest.
+Strubell, E., Ganesh, A., & McCallum, A. (2019). Energy and Policy Considerations for Deep
+Learning in NLP. *Proceedings of the 57th Annual Meeting of the Association for
+Computational Linguistics*, 3645 to 3650. https://doi.org/10.18653/v1/P19-1355
 
-**What happened.** The baseline model, no mitigation at all, had a mean absolute error of
-**7.73 AQI points** on the held-out poorer counties. Both mitigations brought that down to
-**7.57 AQI points**, about a 2% improvement, and both nudged the training sample's average
-poverty rate closer to the true population value: the raw training sample averaged **9.5%**
-poverty, versus a true population mean of **13.0%**, and that moved to 10.4% after
-reweighting and 10.5% after oversampling.
-
-Neither fix actually closed the gap, and I think the reason is fairly simple. Reweighting
-and oversampling can only work with data that already exists, they can't invent a reading
-that was never taken in the first place. If I had to draw one conclusion from this whole
-section, it's that the real fix is putting more monitors where they're needed, not finding
-cleverer ways to patch around the ones that are missing.
-
-## 4. Formulation of the Problem
-
-Air pollution is a serious environmental health risk, and accurate monitoring matters for
-public health protection, regulatory decisions, and fair urban planning. That connects
-directly to **SDG 11** (Sustainable Cities and Communities) and **SDG 13** (Climate
-Action), and given how much air-quality data now feeds into AI-based exposure and
-health-risk models, it also touches **SDG 3** (Good Health and Well-Being) and **SDG 10**
-(Reduced Inequalities). The problem is that the US EPA's Air Quality System (AQS) is
-basically the only data source for almost every downstream air-quality model out there,
-whether that's interpolation, exposure prediction, or health-risk scoring, and all of it
-rests on a network of physical ground monitors that isn't spread evenly across the
-country.
-
-**Problem statement.** Monitor placement in the ground-based AQS isn't random, and that
-non-random placement creates a sample-selection bias. AI models trained on AQS data learn
-from the kind of air-quality readings collected in monitored areas, and then get asked to
-generalize to areas with no monitors at all. This project looks at the racial, income, and
-poverty-related bias present in the US air-quality monitoring network, how much that bias
-actually shows up in a downstream predictive model, and whether standard bias mitigation
-techniques can meaningfully reduce the harm.
-
-**What I set out to do, and did:**
-
-1. Measured income, poverty rate, and racial composition against monitoring coverage
-   across counties of every size.
-2. Worked out statistically what's actually driving the coverage gap, after controlling
-   for population size.
-3. Showed with an actual predictive model what this sampling bias does to performance for
-   underrepresented counties.
-4. Implemented and compared two bias mitigation techniques.
-
-I think closing this monitoring and modelling gap is a basic requirement for any AI system
-that wants to claim it supports fair, SDG-aligned decisions for communities that aren't
-well represented in the data to begin with.
-
-## Data sources
-
-- EPA Air Quality System (AQS) Monitors
-- EPA AirData Annual AQI by County (2024)
-- U.S. Census Bureau, Small Area Income and Poverty Estimates (SAIPE, 2023)
-- U.S. Census Bureau, Population Estimates (2023)
+Wu, C.-J., Raghavendra, R., Gupta, U., Acun, B., Ardalani, N., Maeng, K., Chang, G.,
+Behram, F. A., Huang, J., Bai, C., Gschwind, M., Gupta, A., Ott, M., Melnikov, A., Candido,
+S., Brooks, D., Chauhan, G., Lee, B., Lee, H.-H. S., ... Hazelwood, K. (2022). *Sustainable
+AI: Environmental Implications, Challenges and Opportunities* (arXiv:2111.00364). arXiv.
+https://doi.org/10.48550/arXiv.2111.00364
 
 ---
 
 Written by Dhwani Sanjay Kariya as coursework for *Emerging Artificial Intelligence
-Technologies & Sustainability* (H9ETS), National College of Ireland. The original figures
-(Figures 1 to 8 in the submitted report) are reproduced here as live, interactive charts on
-the [project page](./index.html) instead of as static images.
+Technologies & Sustainability* (H9ETS), National College of Ireland.
