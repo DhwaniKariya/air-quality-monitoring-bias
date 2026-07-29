@@ -1,8 +1,6 @@
 # Data Analysis and Bias Mitigation in AI Models
 
-*This is the written report behind the [interactive data story](./index.html). It's the
-analysis text only. The assignment cover sheet, student ID, and signature pages from the
-original submission aren't included here.*
+*This is the written report behind the [interactive data story](./index.html).*
 
 Part 2 is about figuring out whether some communities' air is being watched for pollution
 less than others, and whether that gap lines up with how wealthy or poor a community is,
