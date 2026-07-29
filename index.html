@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Whose Air Is Being Watched? — An AI Fairness Data Story</title>
+<meta name="description" content="An interactive data story on income, race, and America's air-quality monitoring gap — and how that gap biases the AI models trained on it.">
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --surface-2:      #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-1:       #2a78d6; /* blue */
+    --series-2:       #eb6834; /* orange */
+    --series-3:       #1baf7a; /* aqua */
+    --series-4:       #4a3aa7; /* violet */
+    --status-good:    #0ca30c;
+    --status-critical:#d03b3b;
+    --ink-dark-fill:  #0b0b0b;
+    --card-shadow: 0 1px 2px rgba(11,11,11,0.06), 0 1px 1px rgba(11,11,11,0.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --surface-2:      #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --series-1:       #3987e5;
+      --series-2:       #d95926;
+      --series-3:       #199e70;
+      --series-4:       #9085e9;
+      --status-good:    #0ca30c;
+      --status-critical:#e66767;
+      --ink-dark-fill:  #ffffff;
+      --card-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 1px 1px rgba(0,0,0,0.2);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --surface-2:      #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-1:       #3987e5;
+    --series-2:       #d95926;
+    --series-3:       #199e70;
+    --series-4:       #9085e9;
+    --status-good:    #0ca30c;
+    --status-critical:#e66767;
+    --ink-dark-fill:  #ffffff;
+    --card-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 1px 1px rgba(0,0,0,0.2);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.55;
+  }
+  a { color: var(--series-1); }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+  .wrap-wide { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- top bar ---------- */
+  header.topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--surface-1);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    max-width: 1040px; margin: 0 auto; padding: 12px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .brand { font-weight: 600; font-size: 14px; color: var(--text-secondary); white-space: nowrap; }
+  nav.toc { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  nav.toc::-webkit-scrollbar { display: none; }
+  nav.toc a {
+    color: var(--text-secondary); text-decoration: none; font-size: 13px;
+    padding: 6px 10px; border-radius: 6px; white-space: nowrap;
+  }
+  nav.toc a:hover { background: var(--border); color: var(--text-primary); }
+  .theme-btn {
+    border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary);
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer; flex: none;
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
+  }
+  .theme-btn:hover { background: var(--border); }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 72px 0 40px; }
+  .kicker {
+    font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--series-1); margin: 0 0 14px;
+  }
+  h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.12; margin: 0 0 18px; letter-spacing: -0.01em; }
+  .lede { font-size: 19px; color: var(--text-secondary); max-width: 640px; margin: 0 0 24px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 28px; }
+  .badge {
+    font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--text-secondary);
+  }
+  .byline { font-size: 13px; color: var(--text-muted); }
+  .byline strong { color: var(--text-secondary); }
+
+  /* ---------- sections ---------- */
+  section { padding: 56px 0; border-top: 1px solid var(--border); }
+  section:first-of-type { border-top: none; }
+  .eyebrow {
+    font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--text-muted); margin: 0 0 10px;
+  }
+  h2 { font-size: clamp(22px, 3.4vw, 30px); margin: 0 0 14px; letter-spacing: -0.01em; }
+  .section-intro { color: var(--text-secondary); max-width: 680px; margin: 0 0 28px; font-size: 16px; }
+  .note { color: var(--text-muted); font-size: 13px; margin-top: 10px; }
+
+  /* ---------- cards / charts ---------- */
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px;
+    padding: 24px; box-shadow: var(--card-shadow);
+  }
+  .chart-title { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+  .chart-sub { font-size: 12.5px; color: var(--text-muted); margin: 0 0 18px; }
+  .chart-svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .bar { fill: var(--series-1); transition: y .45s cubic-bezier(.4,0,.2,1), height .45s cubic-bezier(.4,0,.2,1), fill .3s; }
+  .bar:hover { filter: brightness(1.08); cursor: pointer; }
+  .bar-target { fill: var(--text-muted); }
+  .axis-line { stroke: var(--baseline); stroke-width: 1; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .ref-line { stroke: var(--text-secondary); stroke-width: 1.5; stroke-dasharray: 4 4; }
+  .axis-label { fill: var(--text-muted); font-size: 11.5px; }
+  .value-label { fill: var(--text-primary); font-size: 13px; font-weight: 600; }
+  .cat-label { fill: var(--text-secondary); font-size: 12.5px; }
+  .ref-label { fill: var(--text-secondary); font-size: 11.5px; font-weight: 600; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 720px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  /* ---------- tooltip ---------- */
+  .tooltip {
+    position: fixed; pointer-events: none; z-index: 200;
+    background: var(--text-primary); color: var(--surface-1);
+    font-size: 12.5px; padding: 6px 10px; border-radius: 7px;
+    transform: translate(-50%, -130%); opacity: 0; transition: opacity .12s;
+    white-space: nowrap; font-weight: 500;
+  }
+  .tooltip.show { opacity: 1; }
+  .tooltip b { font-weight: 700; }
+
+  /* ---------- hero stat ---------- */
+  .stat-hero { text-align: left; }
+  .stat-hero .value { font-size: clamp(48px, 9vw, 84px); font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+  .stat-hero .value small { font-size: 0.42em; font-weight: 600; color: var(--text-muted); margin-left: 6px; }
+  .stat-hero .label { font-size: 16px; color: var(--text-secondary); margin-top: 8px; max-width: 460px; }
+  .propbar {
+    display: flex; width: 100%; height: 34px; border-radius: 8px; overflow: hidden;
+    margin-top: 26px; background: var(--surface-2); border: 1px solid var(--border);
+  }
+  .propbar .seg-a { background: var(--series-1); }
+  .propbar .seg-b { background: var(--baseline); opacity: .55; }
+  .propbar .seg-a, .propbar .seg-b {
+    display: flex; align-items: center; height: 100%; color: #fff; font-size: 12.5px; font-weight: 700;
+    padding: 0 10px; border-right: 2px solid var(--surface-2);
+  }
+  .propbar .seg-b { color: var(--text-primary); justify-content: flex-end; border-right: none; }
+  .prop-legend { display: flex; gap: 20px; margin-top: 10px; font-size: 13px; color: var(--text-secondary); }
+  .prop-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+  /* ---------- stat tiles (income) ---------- */
+  .stat-pair { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .stat-tile { flex: 1; min-width: 200px; }
+  .stat-tile .value { font-size: 42px; font-weight: 700; letter-spacing: -0.01em; }
+  .stat-tile .label { font-size: 13.5px; color: var(--text-secondary); margin-top: 4px; }
+  .gap-chip {
+    flex: none; text-align: center; padding: 10px 18px; border-radius: 12px;
+    background: color-mix(in srgb, var(--series-2) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--series-2) 35%, transparent);
+  }
+  .gap-chip .num { font-size: 22px; font-weight: 700; color: var(--series-2); }
+  .gap-chip .txt { font-size: 11.5px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; }
+
+  /* ---------- toggle control ---------- */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+  .segmented { display: inline-flex; border: 1px solid var(--border); border-radius: 9px; padding: 3px; background: var(--surface-2); }
+  .segmented button {
+    border: none; background: transparent; color: var(--text-secondary); font-size: 13px; font-weight: 600;
+    padding: 7px 14px; border-radius: 6px; cursor: pointer; font-family: inherit;
+  }
+  .segmented button.active { background: var(--series-1); color: #fff; }
+
+  /* ---------- flow steps ---------- */
+  .flow { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; }
+  .flow-step {
+    flex: 1; min-width: 150px; background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px; position: relative;
+  }
+  .flow-step + .flow-step { margin-left: 28px; }
+  .flow-step + .flow-step::before {
+    content: "→"; position: absolute; left: -24px; top: 50%; transform: translateY(-50%);
+    color: var(--text-muted); font-size: 16px; display: none;
+  }
+  @media (min-width: 760px) { .flow-step + .flow-step::before { display: block; } }
+  .flow-num {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--series-1); color: #fff;
+    font-size: 11.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;
+  }
+  .flow-step h4 { margin: 0 0 4px; font-size: 13.5px; }
+  .flow-step p { margin: 0; font-size: 12.5px; color: var(--text-secondary); }
+  @media (max-width: 759px) { .flow-step + .flow-step { margin-left: 0; margin-top: 14px; } }
+
+  .variant-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 22px 0 26px; }
+  @media (max-width: 720px) { .variant-row { grid-template-columns: 1fr; } }
+  .variant-card { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; background: var(--surface-2); }
+  .variant-card .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 7px; }
+  .variant-card h4 { margin: 6px 0 4px; font-size: 13.5px; }
+  .variant-card p { margin: 0; font-size: 12px; color: var(--text-secondary); }
+
+  /* ---------- sdg cards ---------- */
+  .sdg-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 720px) { .sdg-grid { grid-template-columns: repeat(2, 1fr); } }
+  .sdg-card {
+    border-radius: 12px; padding: 16px; color: #fff; min-height: 110px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+  }
+  .sdg-card .num { font-size: 24px; font-weight: 800; opacity: .85; }
+  .sdg-card .name { font-size: 12.5px; font-weight: 700; line-height: 1.25; margin-top: 2px; }
+  .sdg-3 { background: #4C9F38; }
+  .sdg-10 { background: #DD1367; }
+  .sdg-11 { background: #FD9D24; }
+  .sdg-13 { background: #3F7E44; }
+
+  /* ---------- data table ---------- */
+  details.datatable { margin-top: 34px; }
+  details.datatable summary {
+    cursor: pointer; font-weight: 600; font-size: 14px; padding: 12px 16px;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+  }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+  table th, table td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  table th { color: var(--text-muted); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: .03em; }
+  table td.num { font-variant-numeric: tabular-nums; }
+  .table-scroll { overflow-x: auto; }
+
+  footer { padding: 48px 0 80px; border-top: 1px solid var(--border); }
+  footer p { color: var(--text-secondary); font-size: 13.5px; max-width: 640px; }
+  .foot-links { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 16px; font-size: 13.5px; }
+  .src-list { columns: 2; column-gap: 32px; font-size: 12.5px; color: var(--text-secondary); }
+  @media (max-width: 640px) { .src-list { columns: 1; } }
+  .src-list li { margin-bottom: 6px; break-inside: avoid; }
+
+  ::selection { background: color-mix(in srgb, var(--series-1) 30%, transparent); }
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <span class="brand">Whose Air Is Watched?</span>
+    <nav class="toc">
+      <a href="#gap">The Gap</a>
+      <a href="#money">Income</a>
+      <a href="#race">Race</a>
+      <a href="#confounds">Confounds</a>
+      <a href="#bias-test">Bias Test</a>
+      <a href="#sdgs">SDGs</a>
+      <a href="#data">Data</a>
+    </nav>
+    <button class="theme-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">◐</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="hero">
+    <p class="kicker">AI fairness · environmental justice · data story</p>
+    <h1>Whose air is actually being watched?</h1>
+    <p class="lede">
+      America's EPA air-quality monitoring network is the ground truth every downstream
+      air-quality model relies on. It isn't spread evenly. This project merges four public
+      datasets across all 3,143 U.S. counties to show who gets left off the map — and proves,
+      with an actual model, why that gap isn't harmless.
+    </p>
+    <div class="badges">
+      <span class="badge">SDG 3 · Good Health</span>
+      <span class="badge">SDG 10 · Reduced Inequalities</span>
+      <span class="badge">SDG 11 · Sustainable Cities</span>
+      <span class="badge">SDG 13 · Climate Action</span>
+    </div>
+    <p class="byline">
+      A data-analysis &amp; bias-mitigation project by <strong>Dhwani Sanjay Kariya</strong> ·
+      MSc AI for Business, National College of Ireland — originally built for the
+      <em>Emerging AI Technologies &amp; Sustainability</em> module CA.
+      <a href="report.pdf">Read the full written report ↗</a>
+    </p>
+  </section>
+</div>
+
+<div class="wrap-wide">
+
+  <section id="gap">
+    <p class="eyebrow">01 · The baseline gap</p>
+    <h2>Two-thirds of the country has no ground-truth reading</h2>
+    <p class="section-intro">
+      Four public sources were joined at the county level: EPA's registry of air-quality
+      monitors (filtered to those active since 2023), EPA's 2024 Annual AQI file, and two
+      2023 U.S. Census products — SAIPE income/poverty and county population by race.
+    </p>
+    <div class="card stat-hero">
+      <div class="value" id="gapValue">66.6<small>%</small></div>
+      <div class="label">of U.S. counties — <strong>2,094 of 3,143</strong> — have no active EPA
+        air-quality monitor. If a model or a map claims to describe air quality there, it's
+        extrapolating, not measuring.</div>
+      <div class="propbar">
+        <div class="seg-a" style="width:33.4%">33.4%</div>
+        <div class="seg-b" style="width:66.6%">66.6%</div>
+      </div>
+      <div class="prop-legend">
+        <span><span class="swatch" style="background:var(--series-1)"></span>Has an active monitor (1,049 counties)</span>
+        <span><span class="swatch" style="background:var(--baseline);opacity:.55"></span>No active monitor (2,094 counties)</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="money">
+    <p class="eyebrow">02 · Follow the money</p>
+    <h2>Monitoring coverage tracks income, not just need</h2>
+    <p class="section-intro">
+      Coverage falls steadily as county poverty rises, and rises steadily with county income —
+      the richest counties are monitored almost <strong>2×</strong> as often as the poorest.
+    </p>
+    <div class="grid-2">
+      <div class="card">
+        <p class="chart-title">AQI monitoring coverage by county poverty-rate quartile</p>
+        <p class="chart-sub">% of counties in each quartile with an active monitor</p>
+        <svg class="chart-svg" id="chartPoverty" width="520" height="280" viewBox="0 0 520 280" role="img" aria-label="Bar chart: monitoring coverage falls from 41.7% in the lowest-poverty quartile to 21.5% in the highest-poverty quartile"></svg>
+        <p class="note">Q1/Q4 as reported (41.7% → 21.5%); Q2–Q3 interpolated for illustration.</p>
+      </div>
+      <div class="card">
+        <p class="chart-title">The income gap</p>
+        <p class="chart-sub">% of counties with an active monitor, by income quartile</p>
+        <div class="stat-pair" style="margin-top:30px;">
+          <div class="stat-tile">
+            <div class="value" style="color:var(--text-secondary)">15.1%</div>
+            <div class="label">Lowest-income quartile counties</div>
+          </div>
+          <div class="gap-chip">
+            <div class="num">3.6×</div>
+            <div class="txt">gap</div>
+          </div>
+          <div class="stat-tile">
+            <div class="value" style="color:var(--series-1)">54.5%</div>
+            <div class="label">Highest-income quartile counties</div>
+          </div>
+        </div>
+        <p class="note" style="margin-top:24px;">Computed directly from the merged SAIPE + AQS dataset.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="race">
+    <p class="eyebrow">03 · The racial paradox</p>
+    <h2>The same data tells two opposite stories</h2>
+    <p class="section-intro">
+      Count <em>counties</em> and the most-diverse quartile looks best-monitored. Count
+      <em>people</em> instead, and the least-diverse quartile turns out to be the one left
+      behind — because low-diversity counties are small and rural, so a handful of monitored
+      counties hides millions of unmonitored residents.
+    </p>
+    <div class="card">
+      <div class="toggle-row">
+        <div>
+          <p class="chart-title" id="raceTitle">By county — raw coverage rate</p>
+          <p class="chart-sub" id="raceSub">% of counties in each quartile with an active monitor</p>
+        </div>
+        <div class="segmented" role="tablist" aria-label="Switch chart view">
+          <button class="active" data-view="county" role="tab" aria-selected="true">By county</button>
+          <button data-view="pop" role="tab" aria-selected="false">By resident (population-weighted)</button>
+        </div>
+      </div>
+      <svg class="chart-svg" id="chartRace" width="640" height="300" viewBox="0 0 640 300" role="img" aria-label="Toggleable bar chart comparing racial composition quartiles by county count versus by population"></svg>
+      <p class="note" id="raceNote">Q1 = least diverse quartile of counties · Q4 = most diverse quartile. Q1/Q4 as reported (19.8% → 38.3%); Q2–Q3 interpolated.</p>
+    </div>
+  </section>
+
+  <section id="confounds">
+    <p class="eyebrow">04 · Controlling for both at once</p>
+    <h2>Poverty still predicts monitoring — even for counties the same size</h2>
+    <p class="section-intro">
+      Population size is the obvious confound: bigger counties simply have more regulatory
+      infrastructure of every kind. A logistic regression on <code>log(population)</code>,
+      poverty rate, median income and minority % isolates each factor's independent effect.
+      Bars right of the dashed line at <strong>1.0</strong> raise the odds of having a monitor;
+      bars left of it lower the odds.
+    </p>
+    <div class="card">
+      <p class="chart-title">Predictors of AQI monitor presence — odds ratios</p>
+      <p class="chart-sub">Controlling for county population size</p>
+      <svg class="chart-svg" id="chartOdds" width="640" height="260" viewBox="0 0 640 260" role="img" aria-label="Horizontal bar chart of odds ratios: log population 2.64, median income 1.007, minority percent 1.002, poverty percent 0.985"></svg>
+      <p class="note">Population is the dominant driver (≈3× the odds per 3× the residents). But even holding
+        size constant, higher poverty independently <em>lowers</em> the odds of a monitor, and higher income
+        independently raises it. Minority share, once size is controlled for, has almost no independent effect —
+        the raw pattern in Section 03 was a population-density illusion.</p>
+    </div>
+  </section>
+
+  <section id="bias-test">
+    <p class="eyebrow">05 · Does the bias actually break a model?</p>
+    <h2>Yes — and the standard fixes only partly repair it</h2>
+    <p class="section-intro">
+      Knowing the sample is skewed isn't the same as knowing it matters. So a Random Forest was
+      trained only on below-median-poverty counties to predict Median AQI from population,
+      race, poverty and income — then tested on the poorer counties it had never seen. This
+      mirrors, in miniature, exactly what a national air-quality model does every day.
+    </p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <h4>963 counties</h4>
+        <p>with a valid Median AQI value — the modelling subset.</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <h4>Split by poverty</h4>
+        <p>at the median poverty rate.</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <h4>Train on n = 484</h4>
+        <p>low-poverty counties — over-represented among real monitored counties.</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <h4>Test on n = 479</h4>
+        <p>high-poverty counties, held out entirely.</p>
+      </div>
+    </div>
+
+    <div class="variant-row">
+      <div class="variant-card">
+        <span class="dot" style="background:var(--series-1)"></span><span style="font-size:12px;font-weight:700;">BASELINE</span>
+        <h4>No mitigation</h4>
+        <p>Random Forest trained directly on the low-poverty counties.</p>
+      </div>
+      <div class="variant-card">
+        <span class="dot" style="background:var(--series-3)"></span><span style="font-size:12px;font-weight:700;">MITIGATION 1</span>
+        <h4>Reweighting</h4>
+        <p>Inverse-propensity re-weight the low-poverty counties most similar to the missing group, then train.</p>
+      </div>
+      <div class="variant-card">
+        <span class="dot" style="background:var(--series-4)"></span><span style="font-size:12px;font-weight:700;">MITIGATION 2</span>
+        <h4>Oversampling</h4>
+        <p>Bootstrap-duplicate near-boundary low-poverty counties 3× into the training set, then train.</p>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <p class="chart-title">Prediction error on the held-out poorer counties</p>
+        <p class="chart-sub">Mean absolute error, predicting Median AQI (lower is better)</p>
+        <svg class="chart-svg" id="chartMAE" width="480" height="280" viewBox="0 0 480 280" role="img" aria-label="Bar chart: baseline error 7.73, reweighted 7.57, oversampled 7.57"></svg>
+      </div>
+      <div class="card">
+        <p class="chart-title">Training-sample representativeness</p>
+        <p class="chart-sub">Mean poverty rate the model actually trained on, vs. the true population mean</p>
+        <svg class="chart-svg" id="chartRepr" width="480" height="280" viewBox="0 0 480 280" role="img" aria-label="Bar chart: raw training sample 9.5% poverty vs true population mean 13.0%, reweighted 10.4%, oversampled 10.5%"></svg>
+      </div>
+    </div>
+    <p class="section-intro" style="margin-top:22px; font-size: 15px;">
+      Both mitigations shave error from 7.73 to 7.57 AQI points (≈2%) and nudge the training
+      sample closer to the true 13.0% poverty rate it should represent — but neither closes the
+      gap. Reweighting and oversampling can only rearrange data that already exists; they can't
+      manufacture a reading that was never taken. <strong>The durable fix is more monitors, not
+      more math.</strong>
+    </p>
+  </section>
+
+  <section id="sdgs">
+    <p class="eyebrow">06 · Why it matters</p>
+    <h2>A monitoring gap is a data gap is an equity gap</h2>
+    <p class="section-intro">
+      Air-quality AI systems — from EPA's own tools to academic exposure models and health-risk
+      websites — are only as fair as the ground-truth network they're built on. Closing this gap
+      is a prerequisite for any AI system that claims to support equitable public-health and
+      urban-planning decisions.
+    </p>
+    <div class="sdg-grid">
+      <div class="sdg-card sdg-3"><div class="num">03</div><div class="name">Good Health &amp; Well-Being</div></div>
+      <div class="sdg-card sdg-10"><div class="num">10</div><div class="name">Reduced Inequalities</div></div>
+      <div class="sdg-card sdg-11"><div class="num">11</div><div class="name">Sustainable Cities &amp; Communities</div></div>
+      <div class="sdg-card sdg-13"><div class="num">13</div><div class="name">Climate Action</div></div>
+    </div>
+  </section>
+
+  <section id="data">
+    <p class="eyebrow">07 · Data &amp; methods</p>
+    <h2>Sources and every figure used above</h2>
+    <p class="section-intro">Four public datasets, joined at the U.S. county level (n = 3,143) via FIPS code:</p>
+    <ul class="src-list">
+      <li><strong>EPA AQS Monitors</strong> — all registered U.S. air-quality monitoring sites, filtered to those sampling on/after 2023-01-01.</li>
+      <li><strong>EPA AirData Annual AQI by County (2024)</strong> — Median AQI, available only for adequately-monitored counties.</li>
+      <li><strong>U.S. Census Bureau, SAIPE (2023)</strong> — county median household income and poverty rate.</li>
+      <li><strong>U.S. Census Bureau Population Estimates (2023)</strong> — total population and racial/ethnic composition.</li>
+    </ul>
+
+    <details class="datatable">
+      <summary>View every figure on this page as a data table</summary>
+      <div class="table-scroll">
+      <table>
+        <thead><tr><th>Metric</th><th>Value</th><th>Basis</th></tr></thead>
+        <tbody>
+          <tr><td>Counties with an active monitor</td><td class="num">1,049 / 3,143 (33.4%)</td><td>Reported directly</td></tr>
+          <tr><td>Counties with no active monitor</td><td class="num">2,094 / 3,143 (66.6%)</td><td>Reported directly</td></tr>
+          <tr><td>Coverage, lowest-poverty quartile (Q1)</td><td class="num">41.7%</td><td>Reported directly</td></tr>
+          <tr><td>Coverage, highest-poverty quartile (Q4)</td><td class="num">21.5%</td><td>Reported directly</td></tr>
+          <tr><td>Coverage, lowest-income quartile</td><td class="num">15.1%</td><td>Reported directly</td></tr>
+          <tr><td>Coverage, highest-income quartile</td><td class="num">54.5%</td><td>Reported directly</td></tr>
+          <tr><td>Raw coverage, least-diverse quartile (Q1)</td><td class="num">19.8%</td><td>Reported directly</td></tr>
+          <tr><td>Raw coverage, most-diverse quartile (Q4)</td><td class="num">38.3%</td><td>Reported directly</td></tr>
+          <tr><td>Population unmonitored, least-diverse quartile</td><td class="num">62.6%</td><td>Reported directly</td></tr>
+          <tr><td>Population unmonitored, most-diverse quartile</td><td class="num">10.2%</td><td>Reported directly</td></tr>
+          <tr><td>Odds ratio — log(population)</td><td class="num">≈2.64</td><td>Logistic regression</td></tr>
+          <tr><td>Odds ratio — median income (per $1,000)</td><td class="num">≈1.0074</td><td>Logistic regression</td></tr>
+          <tr><td>Odds ratio — minority %</td><td class="num">≈1.0015</td><td>Logistic regression</td></tr>
+          <tr><td>Odds ratio — poverty %</td><td class="num">≈0.985</td><td>Logistic regression</td></tr>
+          <tr><td>Modelling subset</td><td class="num">963 counties</td><td>Valid Median AQI value</td></tr>
+          <tr><td>Train / test split</td><td class="num">484 / 479 counties</td><td>Median poverty-rate threshold</td></tr>
+          <tr><td>Baseline MAE (held-out poorer counties)</td><td class="num">7.73 AQI pts</td><td>Random Forest, no mitigation</td></tr>
+          <tr><td>Reweighted MAE</td><td class="num">7.57 AQI pts</td><td>Inverse-propensity reweighting</td></tr>
+          <tr><td>Oversampled MAE</td><td class="num">7.57 AQI pts</td><td>Boundary oversampling (3×)</td></tr>
+          <tr><td>True population mean poverty rate</td><td class="num">13.0%</td><td>Reported directly</td></tr>
+          <tr><td>Raw training-sample poverty rate</td><td class="num">9.5%</td><td>Reported directly</td></tr>
+          <tr><td>Poverty rate after reweighting</td><td class="num">10.4%</td><td>Reported directly</td></tr>
+          <tr><td>Poverty rate after oversampling</td><td class="num">10.5%</td><td>Reported directly</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>
+      This page presents Part 2 of a Continuous Assessment for <em>Emerging Artificial
+      Intelligence Technologies &amp; Sustainability</em> (H9ETS) at the National College of
+      Ireland, rebuilt as a standalone, interactive data story. It is independent original
+      analysis conducted for that assignment; methodology, exact figures, statistical tests and
+      full citations are in the written report.
+    </p>
+    <div class="foot-links">
+      <a href="report.pdf">Full written report (PDF)</a>
+      <a href="https://github.com/DhwaniKariya/air-quality-monitoring-bias">GitHub repository</a>
+      <a href="https://github.com/DhwaniKariya">@DhwaniKariya</a>
+      <a href="#gap">Back to top ↑</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- theme toggle ---------------- */
+  var themeBtn = document.getElementById('themeToggle');
+  var root = document.documentElement;
+  function setTheme(t){
+    if (t) { root.setAttribute('data-theme', t); localStorage.setItem('theme', t); }
+    else { root.removeAttribute('data-theme'); localStorage.removeItem('theme'); }
+  }
+  var saved = localStorage.getItem('theme');
+  if (saved) setTheme(saved);
+  themeBtn.addEventListener('click', function(){
+    var current = root.getAttribute('data-theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var effectiveDark = current ? current === 'dark' : prefersDark;
+    setTheme(effectiveDark ? 'light' : 'dark');
+  });
+
+  /* ---------------- tooltip ---------------- */
+  var tip = document.getElementById('tooltip');
+  function showTip(evt, html){
+    tip.innerHTML = html;
+    tip.style.left = evt.clientX + 'px';
+    tip.style.top = evt.clientY + 'px';
+    tip.classList.add('show');
+  }
+  function hideTip(){ tip.classList.remove('show'); }
+
+  var NS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs){
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  /* ---------------- generic vertical bar chart ---------------- */
+  function verticalBars(svg, data, opts){
+    opts = opts || {};
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var vb = svg.viewBox.baseVal;
+    var W = vb.width || 520, H = vb.height || 280;
+    var marginTop = 26, marginBottom = 44, marginLeft = 20, marginRight = 20;
+    var plotW = W - marginLeft - marginRight, plotH = H - marginTop - marginBottom;
+    var max = opts.max || Math.max.apply(null, data.map(function(d){return d.value;})) * 1.2;
+    var n = data.length;
+    var gap = 18;
+    var barW = Math.min(56, (plotW - gap*(n-1)) / n);
+    var totalW = barW*n + gap*(n-1);
+    var startX = marginLeft + (plotW - totalW)/2;
+
+    svg.appendChild(el('line', {x1:marginLeft, y1:marginTop+plotH, x2:marginLeft+plotW, y2:marginTop+plotH, class:'axis-line'}));
+
+    if (opts.refValue !== undefined){
+      var refY = marginTop + plotH - (opts.refValue/max)*plotH;
+      svg.appendChild(el('line', {x1:marginLeft, y1:refY, x2:marginLeft+plotW, y2:refY, class:'ref-line'}));
+      var rl = el('text', {x:marginLeft+plotW, y:refY-6, class:'ref-label', 'text-anchor':'end'});
+      rl.textContent = opts.refLabel || '';
+      svg.appendChild(rl);
+    }
+
+    data.forEach(function(d, i){
+      var x = startX + i*(barW+gap);
+      var h = (d.value/max)*plotH;
+      var y = marginTop + plotH - h;
+      var rect = el('rect', {
+        x: x, y: y, width: barW, height: h, rx: 4, ry: 4,
+        class: 'bar', style: d.color ? ('fill:'+d.color) : ''
+      });
+      rect.addEventListener('mousemove', function(evt){
+        showTip(evt, '<b>'+d.label+'</b><br>'+ (d.tipValue || (d.value + (opts.unit||''))));
+      });
+      rect.addEventListener('mouseleave', hideTip);
+      svg.appendChild(rect);
+
+      var val = el('text', {x: x+barW/2, y: y-8, class:'value-label', 'text-anchor':'middle'});
+      val.textContent = (opts.valueFmt ? opts.valueFmt(d.value) : d.value);
+      svg.appendChild(val);
+
+      var lab = el('text', {x: x+barW/2, y: marginTop+plotH+20, class:'cat-label', 'text-anchor':'middle'});
+      lab.textContent = d.label;
+      svg.appendChild(lab);
+      if (d.sublabel){
+        var lab2 = el('text', {x: x+barW/2, y: marginTop+plotH+34, class:'axis-label', 'text-anchor':'middle'});
+        lab2.textContent = d.sublabel;
+        svg.appendChild(lab2);
+      }
+    });
+  }
+
+  /* ---------------- odds-ratio horizontal chart (bars from zero, reference line at 1.0) ---------------- */
+  function oddsChart(svg, data){
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var vb = svg.viewBox.baseVal;
+    var W = vb.width || 640, H = vb.height || 260;
+    var marginLeft = 150, marginRight = 64, marginTop = 16, marginBottom = 34;
+    var plotW = W - marginLeft - marginRight, plotH = H - marginTop - marginBottom;
+    var maxV = 3.0;
+    function xPos(v){ return marginLeft + (v/maxV)*plotW; }
+    var refX = xPos(1.0);
+
+    svg.appendChild(el('line', {x1:marginLeft, y1:marginTop+plotH, x2:marginLeft, y2:marginTop-4, class:'axis-line'}));
+    svg.appendChild(el('line', {x1:refX, y1:marginTop, x2:refX, y2:marginTop+plotH, class:'ref-line'}));
+    var rl = el('text', {x:refX, y:marginTop-6, class:'ref-label', 'text-anchor':'middle'});
+    rl.textContent = 'OR = 1.0 (no effect)';
+    svg.appendChild(rl);
+
+    var n = data.length;
+    var rowH = plotH/n;
+    var barH = 22;
+
+    data.forEach(function(d, i){
+      var cy = marginTop + rowH*i + rowH/2;
+      var x1 = xPos(d.value);
+      var rect = el('rect', {
+        x:marginLeft, y:cy-barH/2, width:Math.max(3, x1-marginLeft), height:barH, rx:4, ry:4,
+        class:'bar', style:'fill:'+(d.color||'var(--series-1)')
+      });
+      rect.addEventListener('mousemove', function(evt){
+        showTip(evt, '<b>'+d.label+'</b><br>odds ratio ≈ '+d.value.toFixed(3));
+      });
+      rect.addEventListener('mouseleave', hideTip);
+      svg.appendChild(rect);
+
+      var lab = el('text', {x: marginLeft-14, y: cy+4, class:'cat-label', 'text-anchor':'end'});
+      lab.textContent = d.label;
+      svg.appendChild(lab);
+
+      var val = el('text', {x:x1+8, y:cy+4, class:'value-label', 'text-anchor':'start'});
+      val.textContent = d.value.toFixed(3);
+      svg.appendChild(val);
+    });
+  }
+
+  /* ---------------- data ---------------- */
+  var povertyData = [
+    {label:'Q1', sublabel:'lowest poverty', value:41.7, color:'var(--series-1)'},
+    {label:'Q2', sublabel:'', value:37.3, color:'var(--series-1)'},
+    {label:'Q3', sublabel:'', value:32.6, color:'var(--series-1)'},
+    {label:'Q4', sublabel:'highest poverty', value:21.5, color:'var(--series-1)'}
+  ];
+
+  var raceByCounty = [
+    {label:'Q1', sublabel:'least diverse', value:19.8},
+    {label:'Q2', sublabel:'', value:30.0},
+    {label:'Q3', sublabel:'', value:34.0},
+    {label:'Q4', sublabel:'most diverse', value:38.3}
+  ];
+  var raceByPop = [
+    {label:'Q1', sublabel:'least diverse', value:62.6},
+    {label:'Q2', sublabel:'', value:40.5},
+    {label:'Q3', sublabel:'', value:19.5},
+    {label:'Q4', sublabel:'most diverse', value:10.2}
+  ];
+
+  var oddsData = [
+    {label:'log(population)', value:2.64, color:'var(--series-1)'},
+    {label:'Median income', value:1.0074, color:'var(--series-1)'},
+    {label:'Minority %', value:1.0015, color:'var(--series-1)'},
+    {label:'Poverty %', value:0.985, color:'var(--series-1)'}
+  ];
+
+  var maeData = [
+    {label:'Baseline', sublabel:'no mitigation', value:7.73, color:'var(--series-1)', tipValue:'7.73 AQI points'},
+    {label:'Reweighted', sublabel:'', value:7.57, color:'var(--series-3)', tipValue:'7.57 AQI points'},
+    {label:'Oversampled', sublabel:'', value:7.57, color:'var(--series-4)', tipValue:'7.57 AQI points'}
+  ];
+
+  var reprData = [
+    {label:'Raw training', sublabel:'sample', value:9.5, color:'var(--status-critical)', tipValue:'9.5% mean poverty rate'},
+    {label:'Reweighted', sublabel:'', value:10.4, color:'var(--series-3)', tipValue:'10.4% mean poverty rate'},
+    {label:'Oversampled', sublabel:'', value:10.5, color:'var(--series-4)', tipValue:'10.5% mean poverty rate'}
+  ];
+
+  /* ---------------- render ---------------- */
+  function pct(v){ return v.toFixed(1)+'%'; }
+
+  verticalBars(document.getElementById('chartPoverty'), povertyData, {max:50, unit:'%', valueFmt:pct});
+  oddsChart(document.getElementById('chartOdds'), oddsData);
+  verticalBars(document.getElementById('chartMAE'), maeData, {max:9, valueFmt:function(v){return v.toFixed(2);}});
+  verticalBars(document.getElementById('chartRepr'), reprData, {max:15.5, refValue:13.0, refLabel:'True population mean · 13.0%', valueFmt:pct});
+
+  var raceSvg = document.getElementById('chartRace');
+  var raceTitle = document.getElementById('raceTitle');
+  var raceSub = document.getElementById('raceSub');
+  var raceNote = document.getElementById('raceNote');
+  var raceBtns = document.querySelectorAll('.segmented button');
+
+  function renderRace(view){
+    if (view === 'county'){
+      verticalBars(raceSvg, raceByCounty, {max:46, unit:'%', valueFmt:pct});
+      raceTitle.textContent = 'By county — raw coverage rate';
+      raceSub.textContent = '% of counties in each quartile with an active monitor';
+      raceNote.textContent = 'Q1 = least diverse quartile of counties · Q4 = most diverse quartile. Q1/Q4 as reported (19.8% → 38.3%); Q2–Q3 interpolated.';
+    } else {
+      verticalBars(raceSvg, raceByPop, {max:70, unit:'%', valueFmt:pct});
+      raceTitle.textContent = 'By resident — population-weighted';
+      raceSub.textContent = '% of residents in each quartile left with NO active monitor nearby';
+      raceNote.textContent = 'Same counties, weighted by who actually lives there. Q1/Q4 as reported (62.6% → 10.2%); Q2–Q3 interpolated.';
+    }
+  }
+  renderRace('county');
+
+  raceBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      raceBtns.forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected','true');
+      renderRace(btn.getAttribute('data-view'));
+    });
+  });
+
+  /* re-render on theme change so CSS var() colors resolve correctly in tooltips (colors already inherit via var(), no rerender needed for charts) */
+  window.addEventListener('resize', function(){
+    renderRace(document.querySelector('.segmented button.active').getAttribute('data-view'));
+  });
+})();
+</script>
+
+</body>
+</html>
