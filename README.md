@@ -36,10 +36,9 @@ confound-control chart, and the bias-mitigation experiment with before/after res
 This is Part 2 of a Continuous Assessment for *Emerging Artificial Intelligence
 Technologies & Sustainability* (H9ETS) at the National College of Ireland — rebuilt here
 as a standalone, interactive version of the written analysis. All figures on the page are
-taken directly from that report; see [`report.pdf`](./report.pdf) for full methodology,
-statistical tests, and citations (add your own copy of the report to this folder — it
-isn't included in this repo by default since the submitted PDF also contains a signed
-cover sheet and student ID).
+taken directly from that report; see [`REPORT.md`](./REPORT.md) for the full write-up.
+The original submitted PDF is not included in this repo, since it also contains a signed
+cover sheet, student ID, and academic-integrity certificate.
 
 ## Tech
 
