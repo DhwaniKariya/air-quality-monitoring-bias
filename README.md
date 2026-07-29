@@ -2,7 +2,7 @@
 
 **An interactive data story on income, race, and America's air-quality monitoring gap — and how that gap biases the AI models trained on it.**
 
-🔗 **Live page:** _add your GitHub Pages URL here once enabled, e.g. `https://dhwanikariya.github.io/air-quality-monitoring-bias/`_
+🔗 **Live page:** https://dhwanikariya.github.io/air-quality-monitoring-bias/
 
 ![status](https://img.shields.io/badge/status-live-2a78d6) ![type](https://img.shields.io/badge/type-data%20story-1baf7a) ![stack](https://img.shields.io/badge/stack-vanilla%20HTML%2FCSS%2FJS-4a3aa7)
 
