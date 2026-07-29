@@ -1,9 +1,7 @@
 # Creative Analysis of AI's Carbon Footprint
 
 *This is an essay from the same module as [the air-quality monitoring analysis](./ANALYSIS.md)
-in this repo, written for the same Continuous Assessment. It's the essay text only. The
-assignment cover sheet, student ID, and signature pages from the original submission
-aren't included here.*
+in this repo.*
 
 Most of the public debate about AI's environmental impact lands on one thing: the
 training run. The story is always about the electricity used to train a large language
