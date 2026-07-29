@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Whose Air Is Being Watched? — An AI Fairness Data Story</title>
-<meta name="description" content="An interactive data story on income, race, and America's air-quality monitoring gap — and how that gap biases the AI models trained on it.">
+<title>Whose Air Is Being Watched? An AI Fairness Data Story</title>
+<meta name="description" content="An interactive data story about income, race, and America's air-quality monitoring gap, and how that gap ends up biasing the AI models trained on it.">
 <style>
   :root {
     color-scheme: light;
@@ -296,9 +296,10 @@
     <h1>Whose air is actually being watched?</h1>
     <p class="lede">
       America's EPA air-quality monitoring network is the ground truth every downstream
-      air-quality model relies on. It isn't spread evenly. This project merges four public
-      datasets across all 3,143 U.S. counties to show who gets left off the map — and proves,
-      with an actual model, why that gap isn't harmless.
+      air-quality model relies on, but it isn't spread evenly. For this project I merged
+      four public datasets across all 3,143 U.S. counties to see who actually gets left off
+      the map, then built a small model to check whether that gap really matters or is just
+      a curiosity.
     </p>
     <div class="badges">
       <span class="badge">SDG 3 · Good Health</span>
@@ -307,8 +308,8 @@
       <span class="badge">SDG 13 · Climate Action</span>
     </div>
     <p class="byline">
-      A data-analysis &amp; bias-mitigation project by <strong>Dhwani Sanjay Kariya</strong> ·
-      MSc AI for Business, National College of Ireland — originally built for the
+      A data-analysis &amp; bias-mitigation project by <strong>Dhwani Sanjay Kariya</strong>,
+      MSc AI for Business, National College of Ireland. I originally built this for the
       <em>Emerging AI Technologies &amp; Sustainability</em> module CA.
       <a href="REPORT.md">Read the full written report ↗</a>
     </p>
@@ -321,13 +322,13 @@
     <p class="eyebrow">01 · The baseline gap</p>
     <h2>Two-thirds of the country has no ground-truth reading</h2>
     <p class="section-intro">
-      Four public sources were joined at the county level: EPA's registry of air-quality
+      I joined four public sources at the county level: EPA's registry of air-quality
       monitors (filtered to those active since 2023), EPA's 2024 Annual AQI file, and two
-      2023 U.S. Census products — SAIPE income/poverty and county population by race.
+      2023 U.S. Census products, SAIPE income/poverty and county population by race.
     </p>
     <div class="card stat-hero">
       <div class="value" id="gapValue">66.6<small>%</small></div>
-      <div class="label">of U.S. counties — <strong>2,094 of 3,143</strong> — have no active EPA
+      <div class="label">of U.S. counties, <strong>2,094 of 3,143</strong>, have no active EPA
         air-quality monitor. If a model or a map claims to describe air quality there, it's
         extrapolating, not measuring.</div>
       <div class="propbar">
@@ -345,15 +346,15 @@
     <p class="eyebrow">02 · Follow the money</p>
     <h2>Monitoring coverage tracks income, not just need</h2>
     <p class="section-intro">
-      Coverage falls steadily as county poverty rises, and rises steadily with county income —
-      the richest counties are monitored almost <strong>2×</strong> as often as the poorest.
+      Coverage falls steadily as county poverty rises, and rises steadily with county income.
+      The richest counties are monitored almost <strong>2×</strong> as often as the poorest.
     </p>
     <div class="grid-2">
       <div class="card">
         <p class="chart-title">AQI monitoring coverage by county poverty-rate quartile</p>
         <p class="chart-sub">% of counties in each quartile with an active monitor</p>
         <svg class="chart-svg" id="chartPoverty" width="520" height="280" viewBox="0 0 520 280" role="img" aria-label="Bar chart: monitoring coverage falls from 41.7% in the lowest-poverty quartile to 21.5% in the highest-poverty quartile"></svg>
-        <p class="note">Q1/Q4 as reported (41.7% → 21.5%); Q2–Q3 interpolated for illustration.</p>
+        <p class="note">Q1/Q4 as reported (41.7% to 21.5%), Q2 to Q3 interpolated for illustration.</p>
       </div>
       <div class="card">
         <p class="chart-title">The income gap</p>
@@ -383,13 +384,13 @@
     <p class="section-intro">
       Count <em>counties</em> and the most-diverse quartile looks best-monitored. Count
       <em>people</em> instead, and the least-diverse quartile turns out to be the one left
-      behind — because low-diversity counties are small and rural, so a handful of monitored
-      counties hides millions of unmonitored residents.
+      behind. Low-diversity counties tend to be small and rural, so a handful of monitored
+      counties can hide millions of unmonitored residents.
     </p>
     <div class="card">
       <div class="toggle-row">
         <div>
-          <p class="chart-title" id="raceTitle">By county — raw coverage rate</p>
+          <p class="chart-title" id="raceTitle">By county: raw coverage rate</p>
           <p class="chart-sub" id="raceSub">% of counties in each quartile with an active monitor</p>
         </div>
         <div class="segmented" role="tablist" aria-label="Switch chart view">
@@ -398,13 +399,13 @@
         </div>
       </div>
       <svg class="chart-svg" id="chartRace" width="640" height="300" viewBox="0 0 640 300" role="img" aria-label="Toggleable bar chart comparing racial composition quartiles by county count versus by population"></svg>
-      <p class="note" id="raceNote">Q1 = least diverse quartile of counties · Q4 = most diverse quartile. Q1/Q4 as reported (19.8% → 38.3%); Q2–Q3 interpolated.</p>
+      <p class="note" id="raceNote">Q1 = least diverse quartile of counties, Q4 = most diverse quartile. Q1/Q4 as reported (19.8% to 38.3%), Q2 to Q3 interpolated.</p>
     </div>
   </section>
 
   <section id="confounds">
     <p class="eyebrow">04 · Controlling for both at once</p>
-    <h2>Poverty still predicts monitoring — even for counties the same size</h2>
+    <h2>Poverty still predicts monitoring, even for counties the same size</h2>
     <p class="section-intro">
       Population size is the obvious confound: bigger counties simply have more regulatory
       infrastructure of every kind. A logistic regression on <code>log(population)</code>,
@@ -413,31 +414,31 @@
       bars left of it lower the odds.
     </p>
     <div class="card">
-      <p class="chart-title">Predictors of AQI monitor presence — odds ratios</p>
+      <p class="chart-title">Predictors of AQI monitor presence: odds ratios</p>
       <p class="chart-sub">Controlling for county population size</p>
       <svg class="chart-svg" id="chartOdds" width="640" height="260" viewBox="0 0 640 260" role="img" aria-label="Horizontal bar chart of odds ratios: log population 2.64, median income 1.007, minority percent 1.002, poverty percent 0.985"></svg>
-      <p class="note">Population is the dominant driver (≈3× the odds per 3× the residents). But even holding
-        size constant, higher poverty independently <em>lowers</em> the odds of a monitor, and higher income
-        independently raises it. Minority share, once size is controlled for, has almost no independent effect —
-        the raw pattern in Section 03 was a population-density illusion.</p>
+      <p class="note">Population is the dominant driver (roughly 3× the odds per 3× the residents). But even
+        holding size constant, higher poverty independently <em>lowers</em> the odds of a monitor, and higher
+        income independently raises it. Minority share, once size is controlled for, has almost no independent
+        effect. The raw pattern in Section 03 was basically a population-density illusion.</p>
     </div>
   </section>
 
   <section id="bias-test">
     <p class="eyebrow">05 · Does the bias actually break a model?</p>
-    <h2>Yes — and the standard fixes only partly repair it</h2>
+    <h2>Yes, and the usual fixes only patch it up partway</h2>
     <p class="section-intro">
-      Knowing the sample is skewed isn't the same as knowing it matters. So a Random Forest was
-      trained only on below-median-poverty counties to predict Median AQI from population,
-      race, poverty and income — then tested on the poorer counties it had never seen. This
-      mirrors, in miniature, exactly what a national air-quality model does every day.
+      Knowing the sample is skewed isn't the same as knowing it matters, so I trained a Random
+      Forest only on below-median-poverty counties to predict Median AQI from population, race,
+      poverty and income, then tested it on the poorer counties it had never seen. This mirrors,
+      on a small scale, exactly what a national air-quality model does every day.
     </p>
 
     <div class="flow">
       <div class="flow-step">
         <div class="flow-num">1</div>
         <h4>963 counties</h4>
-        <p>with a valid Median AQI value — the modelling subset.</p>
+        <p>with a valid Median AQI value. This is the modelling subset.</p>
       </div>
       <div class="flow-step">
         <div class="flow-num">2</div>
@@ -447,7 +448,7 @@
       <div class="flow-step">
         <div class="flow-num">3</div>
         <h4>Train on n = 484</h4>
-        <p>low-poverty counties — over-represented among real monitored counties.</p>
+        <p>low-poverty counties, over-represented among the real monitored counties.</p>
       </div>
       <div class="flow-step">
         <div class="flow-num">4</div>
@@ -487,22 +488,22 @@
       </div>
     </div>
     <p class="section-intro" style="margin-top:22px; font-size: 15px;">
-      Both mitigations shave error from 7.73 to 7.57 AQI points (≈2%) and nudge the training
-      sample closer to the true 13.0% poverty rate it should represent — but neither closes the
-      gap. Reweighting and oversampling can only rearrange data that already exists; they can't
-      manufacture a reading that was never taken. <strong>The durable fix is more monitors, not
-      more math.</strong>
+      Both mitigations shave error from 7.73 to 7.57 AQI points (about 2%) and nudge the
+      training sample closer to the true 13.0% poverty rate it should represent, but neither one
+      closes the gap. Reweighting and oversampling can only rearrange data that already exists,
+      they can't manufacture a reading that was never taken. <strong>Honestly, I think the real
+      fix here is more monitors, not fancier statistics.</strong>
     </p>
   </section>
 
   <section id="sdgs">
     <p class="eyebrow">06 · Why it matters</p>
-    <h2>A monitoring gap is a data gap is an equity gap</h2>
+    <h2>Why I think this actually matters</h2>
     <p class="section-intro">
-      Air-quality AI systems — from EPA's own tools to academic exposure models and health-risk
-      websites — are only as fair as the ground-truth network they're built on. Closing this gap
-      is a prerequisite for any AI system that claims to support equitable public-health and
-      urban-planning decisions.
+      Air-quality AI systems, whether that's EPA's own tools, academic exposure models, or
+      health-risk websites, are only as fair as the ground-truth network they're built on.
+      Closing this gap is a basic requirement for any AI system that wants to claim it supports
+      fair public-health and urban-planning decisions.
     </p>
     <div class="sdg-grid">
       <div class="sdg-card sdg-3"><div class="num">03</div><div class="name">Good Health &amp; Well-Being</div></div>
@@ -517,10 +518,10 @@
     <h2>Sources and every figure used above</h2>
     <p class="section-intro">Four public datasets, joined at the U.S. county level (n = 3,143) via FIPS code:</p>
     <ul class="src-list">
-      <li><strong>EPA AQS Monitors</strong> — all registered U.S. air-quality monitoring sites, filtered to those sampling on/after 2023-01-01.</li>
-      <li><strong>EPA AirData Annual AQI by County (2024)</strong> — Median AQI, available only for adequately-monitored counties.</li>
-      <li><strong>U.S. Census Bureau, SAIPE (2023)</strong> — county median household income and poverty rate.</li>
-      <li><strong>U.S. Census Bureau Population Estimates (2023)</strong> — total population and racial/ethnic composition.</li>
+      <li><strong>EPA AQS Monitors</strong>: all registered U.S. air-quality monitoring sites, filtered to those sampling on/after 2023-01-01.</li>
+      <li><strong>EPA AirData Annual AQI by County (2024)</strong>: Median AQI, available only for adequately-monitored counties.</li>
+      <li><strong>U.S. Census Bureau, SAIPE (2023)</strong>: county median household income and poverty rate.</li>
+      <li><strong>U.S. Census Bureau Population Estimates (2023)</strong>: total population and racial/ethnic composition.</li>
     </ul>
 
     <details class="datatable">
@@ -539,10 +540,10 @@
           <tr><td>Raw coverage, most-diverse quartile (Q4)</td><td class="num">38.3%</td><td>Reported directly</td></tr>
           <tr><td>Population unmonitored, least-diverse quartile</td><td class="num">62.6%</td><td>Reported directly</td></tr>
           <tr><td>Population unmonitored, most-diverse quartile</td><td class="num">10.2%</td><td>Reported directly</td></tr>
-          <tr><td>Odds ratio — log(population)</td><td class="num">≈2.64</td><td>Logistic regression</td></tr>
-          <tr><td>Odds ratio — median income (per $1,000)</td><td class="num">≈1.0074</td><td>Logistic regression</td></tr>
-          <tr><td>Odds ratio — minority %</td><td class="num">≈1.0015</td><td>Logistic regression</td></tr>
-          <tr><td>Odds ratio — poverty %</td><td class="num">≈0.985</td><td>Logistic regression</td></tr>
+          <tr><td>Odds ratio, log(population)</td><td class="num">≈2.64</td><td>Logistic regression</td></tr>
+          <tr><td>Odds ratio, median income (per $1,000)</td><td class="num">≈1.0074</td><td>Logistic regression</td></tr>
+          <tr><td>Odds ratio, minority %</td><td class="num">≈1.0015</td><td>Logistic regression</td></tr>
+          <tr><td>Odds ratio, poverty %</td><td class="num">≈0.985</td><td>Logistic regression</td></tr>
           <tr><td>Modelling subset</td><td class="num">963 counties</td><td>Valid Median AQI value</td></tr>
           <tr><td>Train / test split</td><td class="num">484 / 479 counties</td><td>Median poverty-rate threshold</td></tr>
           <tr><td>Baseline MAE (held-out poorer counties)</td><td class="num">7.73 AQI pts</td><td>Random Forest, no mitigation</td></tr>
@@ -763,14 +764,14 @@
   function renderRace(view){
     if (view === 'county'){
       verticalBars(raceSvg, raceByCounty, {max:46, unit:'%', valueFmt:pct});
-      raceTitle.textContent = 'By county — raw coverage rate';
+      raceTitle.textContent = 'By county: raw coverage rate';
       raceSub.textContent = '% of counties in each quartile with an active monitor';
-      raceNote.textContent = 'Q1 = least diverse quartile of counties · Q4 = most diverse quartile. Q1/Q4 as reported (19.8% → 38.3%); Q2–Q3 interpolated.';
+      raceNote.textContent = 'Q1 = least diverse quartile of counties, Q4 = most diverse quartile. Q1/Q4 as reported (19.8% to 38.3%), Q2 to Q3 interpolated.';
     } else {
       verticalBars(raceSvg, raceByPop, {max:70, unit:'%', valueFmt:pct});
-      raceTitle.textContent = 'By resident — population-weighted';
+      raceTitle.textContent = 'By resident: population-weighted';
       raceSub.textContent = '% of residents in each quartile left with NO active monitor nearby';
-      raceNote.textContent = 'Same counties, weighted by who actually lives there. Q1/Q4 as reported (62.6% → 10.2%); Q2–Q3 interpolated.';
+      raceNote.textContent = 'Same counties, weighted by who actually lives there. Q1/Q4 as reported (62.6% to 10.2%), Q2 to Q3 interpolated.';
     }
   }
   renderRace('county');
